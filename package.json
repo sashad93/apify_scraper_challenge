@@ -1,0 +1,21 @@
+{
+	"name": "apify_scraper_challenge",
+	"version": "1.0.0",
+	"description": "Crawl a number of web pages using headless Chrome and Puppeteer",
+	"main": "main.js",
+	"dependencies": {
+		"apify": "^0.11.8",
+		"util": "^0.11.1"
+	},
+	"devDependencies": {},
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": ""
+	},
+	"author": "",
+	"license": "ISC",
+	"homepage": ""
+}
