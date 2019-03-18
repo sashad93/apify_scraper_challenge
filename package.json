@@ -5,11 +5,13 @@
 	"main": "main.js",
 	"dependencies": {
 		"apify": "^0.11.8",
+		"moment": "^2.24.0",
 		"util": "^0.11.1"
 	},
 	"devDependencies": {},
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node main"
 	},
 	"repository": {
 		"type": "git",
