@@ -1,0 +1,1 @@
+This project contains a web scraper that extracts data for the events from visithouston.com. It will not work for any other website. To use it locally, git clone this repository, then run npm install and npm start. Then just sit back and watch the magic happen. 
