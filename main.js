@@ -113,12 +113,12 @@ const getEventData = async ({ page, request}) => {
     const place=await page.$eval('.adrs', pageFunction, "place")
     const block= await page.$$eval('.detail-c2 > div:not([class])', pageFunction, "block")
     const timestamp=new Date().toUTCString()
-    let event= {title, ...date, url, description, ...block, place, timestamp}
+    let event= {title, date: parseDate(date.date, date.recurring, block.time), url, description, ...block, place, timestamp}
     console.log("EVENT",event)
     //for writing data to files, if desired.
-    // fs.writeFile(path.join(__dirname, "events_scraped",`visithouston${request.id}.json`), JSON.stringify(event), "utf8", (error)=>{
-    //     console.log("File written.", error)
-    // })
+    fs.writeFile(path.join(__dirname, "events_scraped",`visithouston${request.id}.json`), JSON.stringify(event, null, 4), "utf8", (error)=>{
+        console.log("File written.", error)
+    })
 
     console.log(`Page ${request.url} succeeded and it has ${date.length} posts.`);
 
@@ -131,28 +131,45 @@ const getEventData = async ({ page, request}) => {
 //not used
 function parseDate(date, recurring, time){
     date=date.split("-");
-    time=time.split("to")
-    const start=moment(date[0].trim()+" "+time[0].trim())
-    const end=moment(date[1].trim()+" "+ time[1].trim())
-    if (recurring.indexOf("daily")!==-1){
-        let range=[]
-        let current=start
-        while (current.isBefore(end)){
-            range.push({startDate:moment(current).format("YYYY-MM-DDTHH:mm:ss"), endDate: moment(current.format("YYYY-MM-DD")+" "+time[1]).format("YYYY-MM-DDTHH:mm:ss")})
-            current.add(1, "days")
-        }
-        return range;
+    time=time? time.split("to"): null
+    startTime=time && time[0]? time[0] : ""
+    endTime=time && time[1]? time[1] : "11:59 PM"
+    const start=moment(date[0].trim()+" "+startTime)
+    const end=moment((date.length>1?date[1].trim(): date[0].trim())+" "+ endTime)
+    if (!start.isValid() || !end.isValid()){
+        console.log("unable to parse date")
+        return date
     }
-    else if (recurring.indexOf("weekly")!==-1){
-        let range=[]
-        let current=start
-        while (current.isBefore(end)){
-            range.push({startDate:moment(current).format("YYYY-MM-DDTHH:mm:ss"), endDate: moment(current.format("YYYY-MM-DD")+" "+time[1]).format("YYYY-MM-DDTHH:mm:ss")})
-            current.add(7, "days")
+    if (recurring){
+        if (recurring.indexOf("daily")!==-1){
+            let range=[]
+            let current=start
+            while (current.isBefore(end)){
+                range.push({startDate:moment(current).format("YYYY-MM-DDTHH:mm:ss"), endDate: moment(current.format("YYYY-MM-DD")+" "+endTime).format("YYYY-MM-DDTHH:mm:ss")})
+                current.add(1, "days")
+            }
+            return range;
         }
-        return range
+        else if (recurring.indexOf("weekly")!==-1){
+            let range=[]
+            let current=start
+            while (current.isBefore(end)){
+                range.push({startDate:moment(current).format("YYYY-MM-DDTHH:mm:ss"), endDate: moment(current.format("YYYY-MM-DD")+" "+endTime).format("YYYY-MM-DDTHH:mm:ss")})
+                current.add(7, "days")
+            }
+            return range
+        }
+        else if (recurring.indexOf("monthly")!==-1){
+            let range=[]
+            let current=start
+            while (current.isBefore(end)){
+                range.push({startDate:moment(current).format("YYYY-MM-DDTHH:mm:ss"), endDate: moment(current.format("YYYY-MM-DD")+" "+endTime).format("YYYY-MM-DDTHH:mm:ss")})
+                current.add(1, "months")
+            }
+            return range
+        }
     }
     else {
-        return {startDate:moment(start).format("YYYY-MM-DDTHH:mm:ss"), endDate: moment(end).format("YYYY-MM-DDTHH:mm:ss")}
+        return {startDate:start.format("YYYY-MM-DDTHH:mm:ss"), endDate: end.format("YYYY-MM-DDTHH:mm:ss")}
     }
 }
